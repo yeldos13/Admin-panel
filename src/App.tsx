@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { OrdersTable } from './components/OrdersTable'
+import { generateOrders } from './data/orders'
 import { ROLES, type Role } from './data/permissions'
 
 const TABS = ['Orders', 'Dashboard'] as const
@@ -7,6 +9,7 @@ type Tab = (typeof TABS)[number]
 export default function App() {
   const [role, setRole] = useState<Role>('admin')
   const [tab, setTab] = useState<Tab>('Orders')
+  const [orders] = useState(generateOrders)
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -47,8 +50,11 @@ export default function App() {
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 py-6">
-        <h2 className="text-xl font-semibold">{tab}</h2>
-        <p className="mt-1 text-sm text-slate-500">Signed in as {role}.</p>
+        {tab === 'Orders' ? (
+          <OrdersTable orders={orders} />
+        ) : (
+          <h2 className="text-xl font-semibold">Dashboard</h2>
+        )}
       </main>
     </div>
   )
