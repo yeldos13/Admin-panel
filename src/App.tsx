@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react'
 import { OrderFilters } from './components/OrderFilters'
+import { EditOrderDialog } from './components/EditOrderDialog'
 import { OrdersTable } from './components/OrdersTable'
-import { generateOrders } from './data/orders'
+import type { Order } from './data/orders'
 import { ROLES, type Role } from './data/permissions'
 import { emptyFilters, filterOrders } from './data/query'
+import { clearOrders, loadOrders, saveOrders } from './data/storage'
 
 const TABS = ['Orders', 'Dashboard'] as const
 type Tab = (typeof TABS)[number]
@@ -11,9 +13,24 @@ type Tab = (typeof TABS)[number]
 export default function App() {
   const [role, setRole] = useState<Role>('admin')
   const [tab, setTab] = useState<Tab>('Orders')
-  const [orders] = useState(generateOrders)
+  const [orders, setOrders] = useState(loadOrders)
+  const [editing, setEditing] = useState<Order | null>(null)
   const [filters, setFilters] = useState(emptyFilters)
   const filtered = useMemo(() => filterOrders(orders, filters), [orders, filters])
+
+  const update = (next: Order[]) => {
+    setOrders(next)
+    saveOrders(next)
+  }
+  const save = (o: Order) => {
+    update(orders.map(x => (x.id === o.id ? o : x)))
+    setEditing(null)
+  }
+  const reset = () => {
+    if (!confirm('Reset all orders to the original demo data?')) return
+    clearOrders()
+    setOrders(loadOrders())
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -51,18 +68,22 @@ export default function App() {
               ))}
             </select>
           </label>
+          <button onClick={reset} className="text-sm text-slate-600 underline hover:text-slate-900">
+            Reset data
+          </button>
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 py-6">
         {tab === 'Orders' ? (
           <>
             <OrderFilters value={filters} onChange={setFilters} count={filtered.length} />
-            <OrdersTable orders={filtered} />
+            <OrdersTable orders={filtered} resetPageOn={filters} onEdit={setEditing} />
           </>
         ) : (
           <h2 className="text-xl font-semibold">Dashboard</h2>
         )}
       </main>
+      {editing && <EditOrderDialog key={editing.id} order={editing} onSave={save} onClose={() => setEditing(null)} />}
     </div>
   )
 }

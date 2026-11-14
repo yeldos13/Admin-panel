@@ -24,13 +24,13 @@ export const STATUS_STYLES: Record<Status, string> = {
 
 export const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
 
-export function OrdersTable({ orders }: { orders: Order[] }) {
+export function OrdersTable({ orders, resetPageOn, onEdit }: { orders: Order[]; resetPageOn: unknown; onEdit: (o: Order) => void }) {
   const [sort, setSort] = useState<Sort>({ key: 'date', dir: 'desc' })
   const [page, setPage] = useState(0)
-  const [seen, setSeen] = useState(orders)
-  if (seen !== orders) {
-    // back to page 1 when the filtered list changes
-    setSeen(orders)
+  const [seen, setSeen] = useState(resetPageOn)
+  if (seen !== resetPageOn) {
+    // back to page 1 when filters change, but not after an edit
+    setSeen(resetPageOn)
     setPage(0)
   }
 
@@ -66,7 +66,8 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
       </div>
       <ul className="divide-y divide-slate-100 sm:hidden">
         {rows.map(o => (
-          <li key={o.id} className="p-3 text-sm">
+          <li key={o.id}>
+            <button onClick={() => onEdit(o)} aria-label={`Edit ${o.id}`} className="block w-full p-3 text-left text-sm hover:bg-slate-50">
             <div className="flex items-center justify-between gap-2">
               <span className="font-medium">{o.customer}</span>
               <span className="tabular-nums font-medium">{money.format(o.amount)}</span>
@@ -80,6 +81,7 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
             <div className="mt-1 text-slate-500">
               {o.product} · {o.region}
             </div>
+            </button>
           </li>
         ))}
         {rows.length === 0 && <li className="p-8 text-center text-slate-500">No orders found.</li>}
@@ -107,7 +109,11 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
           <tbody className="divide-y divide-slate-100">
             {rows.map(o => (
               <tr key={o.id} className="hover:bg-slate-50">
-                <td className="px-3 py-2 font-mono text-xs">{o.id}</td>
+                <td className="px-3 py-2">
+                  <button onClick={() => onEdit(o)} aria-label={`Edit ${o.id}`} className="font-mono text-xs text-sky-700 underline hover:text-sky-900">
+                    {o.id}
+                  </button>
+                </td>
                 <td className="px-3 py-2 whitespace-nowrap">{o.date}</td>
                 <td className="px-3 py-2">{o.customer}</td>
                 <td className="px-3 py-2">{o.product}</td>
