@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { OrderFilters } from './components/OrderFilters'
 import { OrdersTable } from './components/OrdersTable'
 import { generateOrders } from './data/orders'
 import { ROLES, type Role } from './data/permissions'
+import { emptyFilters, filterOrders } from './data/query'
 
 const TABS = ['Orders', 'Dashboard'] as const
 type Tab = (typeof TABS)[number]
@@ -10,6 +12,8 @@ export default function App() {
   const [role, setRole] = useState<Role>('admin')
   const [tab, setTab] = useState<Tab>('Orders')
   const [orders] = useState(generateOrders)
+  const [filters, setFilters] = useState(emptyFilters)
+  const filtered = useMemo(() => filterOrders(orders, filters), [orders, filters])
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -51,7 +55,10 @@ export default function App() {
       </header>
       <main className="mx-auto max-w-6xl px-4 py-6">
         {tab === 'Orders' ? (
-          <OrdersTable orders={orders} />
+          <>
+            <OrderFilters value={filters} onChange={setFilters} count={filtered.length} />
+            <OrdersTable orders={filtered} />
+          </>
         ) : (
           <h2 className="text-xl font-semibold">Dashboard</h2>
         )}

@@ -27,6 +27,12 @@ export const money = new Intl.NumberFormat('en-US', { style: 'currency', currenc
 export function OrdersTable({ orders }: { orders: Order[] }) {
   const [sort, setSort] = useState<Sort>({ key: 'date', dir: 'desc' })
   const [page, setPage] = useState(0)
+  const [seen, setSeen] = useState(orders)
+  if (seen !== orders) {
+    // back to page 1 when the filtered list changes
+    setSeen(orders)
+    setPage(0)
+  }
 
   const pages = Math.max(1, Math.ceil(orders.length / PAGE_SIZE))
   const current = Math.min(page, pages - 1)
