@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { OrderFilters } from './components/OrderFilters'
 import { EditOrderDialog } from './components/EditOrderDialog'
 import { OrdersTable } from './components/OrdersTable'
+import { downloadCsv } from './data/csv'
 import type { Order } from './data/orders'
 import { applyEdit, can, ROLE_HINTS, ROLES, type Role } from './data/permissions'
 import { emptyFilters, filterOrders } from './data/query'
@@ -84,7 +85,12 @@ export default function App() {
         <p className="mb-4 text-sm text-slate-500">{ROLE_HINTS[role]}</p>
         {tab === 'Orders' ? (
           <>
-            <OrderFilters value={filters} onChange={setFilters} count={filtered.length} />
+            <OrderFilters
+              value={filters}
+              onChange={setFilters}
+              count={filtered.length}
+              onExport={can(role, 'export') ? () => downloadCsv(filtered) : undefined}
+            />
             <OrdersTable orders={filtered} resetPageOn={filters} onEdit={setEditing} />
           </>
         ) : (

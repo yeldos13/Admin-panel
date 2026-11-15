@@ -3,7 +3,14 @@ import { emptyFilters, type Filters } from '../data/query'
 
 const field = 'rounded-md border border-slate-300 bg-white px-3 py-2 text-sm'
 
-export function OrderFilters({ value, onChange, count }: { value: Filters; onChange: (f: Filters) => void; count: number }) {
+interface Props {
+  value: Filters
+  onChange: (f: Filters) => void
+  count: number
+  onExport?: () => void // hidden when the role cannot export
+}
+
+export function OrderFilters({ value, onChange, count, onExport }: Props) {
   const set = (patch: Partial<Filters>) => onChange({ ...value, ...patch })
   const dirty = JSON.stringify(value) !== JSON.stringify(emptyFilters)
 
@@ -41,6 +48,15 @@ export function OrderFilters({ value, onChange, count }: { value: Filters; onCha
       <span className="ml-auto text-sm text-slate-500" aria-live="polite">
         {count} {count === 1 ? 'order' : 'orders'}
       </span>
+      {onExport && (
+        <button
+          onClick={onExport}
+          disabled={count === 0}
+          className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium hover:bg-slate-100 disabled:opacity-40"
+        >
+          Export CSV
+        </button>
+      )}
     </div>
   )
 }
