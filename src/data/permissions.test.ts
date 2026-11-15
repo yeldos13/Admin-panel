@@ -1,5 +1,23 @@
 import { describe, expect, it } from 'vitest'
-import { can, type Action, type Role } from './permissions'
+import { generateOrders } from './orders'
+import { applyEdit, can, type Action, type Role } from './permissions'
+
+describe('applyEdit', () => {
+  const original = generateOrders(1)[0]
+  const draft = { ...original, id: 'HACK', customer: 'Changed', amount: 9999, status: 'cancelled' as const, note: 'changed note' }
+
+  it('admin changes everything except id', () => {
+    expect(applyEdit('admin', original, draft)).toEqual({ ...draft, id: original.id })
+  })
+
+  it('manager changes only status and note', () => {
+    expect(applyEdit('manager', original, draft)).toEqual({ ...original, status: 'cancelled', note: 'changed note' })
+  })
+
+  it('viewer changes nothing', () => {
+    expect(applyEdit('viewer', original, draft)).toEqual(original)
+  })
+})
 
 const expected: Record<Action, Record<Role, boolean>> = {
   view: { admin: true, manager: true, viewer: true },

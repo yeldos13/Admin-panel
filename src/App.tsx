@@ -3,7 +3,7 @@ import { OrderFilters } from './components/OrderFilters'
 import { EditOrderDialog } from './components/EditOrderDialog'
 import { OrdersTable } from './components/OrdersTable'
 import type { Order } from './data/orders'
-import { ROLES, type Role } from './data/permissions'
+import { applyEdit, can, ROLE_HINTS, ROLES, type Role } from './data/permissions'
 import { emptyFilters, filterOrders } from './data/query'
 import { clearOrders, loadOrders, saveOrders } from './data/storage'
 
@@ -23,11 +23,16 @@ export default function App() {
     saveOrders(next)
   }
   const save = (o: Order) => {
-    update(orders.map(x => (x.id === o.id ? o : x)))
+    update(orders.map(x => (x.id === o.id ? applyEdit(role, x, o) : x)))
+    setEditing(null)
+  }
+  const remove = (o: Order) => {
+    if (!can(role, 'delete')) return
+    update(orders.filter(x => x.id !== o.id))
     setEditing(null)
   }
   const reset = () => {
-    if (!confirm('Reset all orders to the original demo data?')) return
+    if (!can(role, 'reset') || !confirm('Reset all orders to the original demo data?')) return
     clearOrders()
     setOrders(loadOrders())
   }
@@ -68,12 +73,15 @@ export default function App() {
               ))}
             </select>
           </label>
-          <button onClick={reset} className="text-sm text-slate-600 underline hover:text-slate-900">
-            Reset data
-          </button>
+          {can(role, 'reset') && (
+            <button onClick={reset} className="text-sm text-slate-600 underline hover:text-slate-900">
+              Reset data
+            </button>
+          )}
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 py-6">
+        <p className="mb-4 text-sm text-slate-500">{ROLE_HINTS[role]}</p>
         {tab === 'Orders' ? (
           <>
             <OrderFilters value={filters} onChange={setFilters} count={filtered.length} />
@@ -83,7 +91,7 @@ export default function App() {
           <h2 className="text-xl font-semibold">Dashboard</h2>
         )}
       </main>
-      {editing && <EditOrderDialog key={editing.id} order={editing} onSave={save} onClose={() => setEditing(null)} />}
+      {editing && <EditOrderDialog key={editing.id} order={editing} role={role} onSave={save} onDelete={remove} onClose={() => setEditing(null)} />}
     </div>
   )
 }

@@ -1,4 +1,6 @@
-export const ROLES = ['admin', 'manager', 'viewer'] as const
+import type { Order } from './orders'
+
+export const ROLES =['admin', 'manager', 'viewer'] as const
 export type Role = (typeof ROLES)[number]
 
 export type Action =
@@ -17,3 +19,15 @@ const RULES: Record<Role, readonly Action[]> = {
 }
 
 export const can = (role: Role, action: Action) => RULES[role].includes(action)
+
+export const ROLE_HINTS: Record<Role, string> = {
+  admin: 'Admin: full access, can delete orders and reset data.',
+  manager: 'Manager: can change status and notes, and export.',
+  viewer: 'Viewer: read only.',
+}
+
+// keeps fields the role may not change, whatever the form sent
+export function applyEdit(role: Role, original: Order, draft: Order): Order {
+  const status = can(role, 'editStatus') ? { status: draft.status, note: draft.note } : {}
+  return can(role, 'editDetails') ? { ...draft, id: original.id } : { ...original, ...status }
+}

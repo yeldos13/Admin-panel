@@ -67,7 +67,7 @@ export function OrdersTable({ orders, resetPageOn, onEdit }: { orders: Order[]; 
       <ul className="divide-y divide-slate-100 sm:hidden">
         {rows.map(o => (
           <li key={o.id}>
-            <button onClick={() => onEdit(o)} aria-label={`Edit ${o.id}`} className="block w-full p-3 text-left text-sm hover:bg-slate-50">
+            <button onClick={() => onEdit(o)} aria-label={`Open ${o.id}`} className="block w-full p-3 text-left text-sm hover:bg-slate-50">
             <div className="flex items-center justify-between gap-2">
               <span className="font-medium">{o.customer}</span>
               <span className="tabular-nums font-medium">{money.format(o.amount)}</span>
@@ -110,7 +110,7 @@ export function OrdersTable({ orders, resetPageOn, onEdit }: { orders: Order[]; 
             {rows.map(o => (
               <tr key={o.id} className="hover:bg-slate-50">
                 <td className="px-3 py-2">
-                  <button onClick={() => onEdit(o)} aria-label={`Edit ${o.id}`} className="font-mono text-xs text-sky-700 underline hover:text-sky-900">
+                  <button onClick={() => onEdit(o)} aria-label={`Open ${o.id}`} className="font-mono text-xs text-sky-700 underline hover:text-sky-900">
                     {o.id}
                   </button>
                 </td>
