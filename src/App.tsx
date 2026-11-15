@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { lazy, Suspense, useMemo, useState } from 'react'
 import { OrderFilters } from './components/OrderFilters'
 import { EditOrderDialog } from './components/EditOrderDialog'
 import { OrdersTable } from './components/OrdersTable'
@@ -7,6 +7,9 @@ import type { Order } from './data/orders'
 import { applyEdit, can, ROLE_HINTS, ROLES, type Role } from './data/permissions'
 import { emptyFilters, filterOrders } from './data/query'
 import { clearOrders, loadOrders, saveOrders } from './data/storage'
+
+// charts library loads only when the Dashboard tab opens
+const Dashboard = lazy(() => import('./components/Dashboard'))
 
 const TABS = ['Orders', 'Dashboard'] as const
 type Tab = (typeof TABS)[number]
@@ -94,7 +97,9 @@ export default function App() {
             <OrdersTable orders={filtered} resetPageOn={filters} onEdit={setEditing} />
           </>
         ) : (
-          <h2 className="text-xl font-semibold">Dashboard</h2>
+          <Suspense fallback={<p className="text-sm text-slate-500">Loading charts…</p>}>
+            <Dashboard orders={orders} />
+          </Suspense>
         )}
       </main>
       {editing && <EditOrderDialog key={editing.id} order={editing} role={role} onSave={save} onDelete={remove} onClose={() => setEditing(null)} />}
