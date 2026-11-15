@@ -47,7 +47,7 @@ export function EditOrderDialog({ order, role, onSave, onDelete, onClose }: Prop
       ref={ref}
       onClose={onClose}
       aria-labelledby="edit-title"
-      className="m-auto w-full max-w-lg rounded-lg p-0 shadow-xl backdrop:bg-slate-900/40"
+      className="m-auto w-[calc(100%-2rem)] max-w-lg rounded-lg p-0 shadow-xl backdrop:bg-slate-900/40"
     >
       <form onSubmit={submit} noValidate className="space-y-4 p-5">
         <h2 id="edit-title" className="text-lg font-semibold">
